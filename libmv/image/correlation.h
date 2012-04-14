@@ -1,4 +1,4 @@
-// Copyright (c) 2007, 2008, 2009 libmv authors.
+// Copyright (c) 2012 libmv authors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to
@@ -18,14 +18,34 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 
-#ifndef LIBMV_LOGGING_LOGGING_H
-#define LIBMV_LOGGING_LOGGING_H
+#ifndef LIBMV_IMAGE_CORRELATION_H
+#define LIBMV_IMAGE_CORRELATION_H
 
-#include <glog/logging.h>
+#include "libmv/image/image.h"
 
-#define LG LOG(INFO)
-#define V0 LOG(INFO)
-#define V1 LOG(INFO)
-#define V2 LOG(INFO)
+namespace libmv {
 
-#endif  // LIBMV_LOGGING_LOGGING_H
+inline double PearsonProductMomentCorrelation(Array3Df image_and_gradient1_sampled,
+                                              Array3Df image_and_gradient2_sampled,
+                                              int width) {
+  double sX=0,sY=0,sXX=0,sYY=0,sXY=0;
+  for (int r = 0; r < width; ++r) {
+    for (int c = 0; c < width; ++c) {
+      double x = image_and_gradient1_sampled(r, c, 0);
+      double y = image_and_gradient2_sampled(r, c, 0);
+      sX += x;
+      sY += y;
+      sXX += x*x;
+      sYY += y*y;
+      sXY += x*y;
+    }
+  }
+  double N = width*width;
+  sX /= N, sY /= N, sXX /= N, sYY /= N, sXY /= N;
+  double correlation = (sXY-sX*sY)/sqrt(double((sXX-sX*sX)*(sYY-sY*sY)));
+  return correlation;
+}
+
+}  // namespace libmv
+
+#endif  // LIBMV_IMAGE_IMAGE_CORRELATION_H
