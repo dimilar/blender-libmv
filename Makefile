@@ -21,7 +21,8 @@ INCDIR := -I. -I/scratch/progs/llvm/include/c++/v1 -I/usr/include/eigen3\
 -I../gtest/include\
 -I../../tests/gtests\
 -Ithird\
--I../../intern/guardedalloc
+-I../../intern/guardedalloc\
+-I./
 
 LDDIR  := -L /scratch/progs/llvm/lib
 
