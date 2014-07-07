@@ -7,7 +7,7 @@ STD  := c++11
 ifdef debug
     OPT_FLAGS := -g3
 else
-    OPT_FLAGS := -O3    
+    OPT_FLAGS := -O3 -fopenmp -flto -fPIC
 endif
 
 INCDIR := -I. -I/scratch/progs/llvm/include/c++/v1 -I/usr/include/eigen3\
@@ -28,14 +28,14 @@ LDDIR  := -L /scratch/progs/llvm/lib
 
 CXXFLAGS := $(OPT_FLAGS) -std=$(STD) -fopenmp -march=$(ARCH) -Wall -fPIC -DLINUX $(INCDIR) \
 	-DWITH_LIBMV\
-	-DWITH_LIBMV_GUARDED_ALLOC\
 	-DGOOGLE_GLOG_DLL_DECL=\
 	-DLIBMV_NO_FAST_DETECTOR=
+# -DWITH_LIBMV_GUARDED_ALLOC\
 
 LDFLAGS := $(LDDIR) -stdlib=libc++  -lc++abi
 
 BUILD_DIR = build
-PROGRAMS = libmv.so
+PROGRAMS = libmv.so mvtest
 all:$(PROGRAMS)
 
 BASE_OBJECTS = $(patsubst libmv/base/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/base -name \*.cc))
@@ -48,7 +48,7 @@ CAPI_OBJECTS = $(patsubst %.cc,$(BUILD_DIR)/%.o,$(wildcard *.cc))
 
 $(BASE_OBJECTS): $(BUILD_DIR)/%.o: libmv/base/%.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
-$(IM_OBJECTS): $(BUILD_DIR)/%.o: libmv/image/%.cc
+$(IMG_OBJECTS): $(BUILD_DIR)/%.o: libmv/image/%.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 $(TR_OBJECTS): $(BUILD_DIR)/%.o: libmv/tracking/%.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
@@ -60,11 +60,14 @@ $(SP_OBJECTS): $(BUILD_DIR)/%.o: libmv/simple_pipeline/%.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 $(CAPI_OBJECTS):$(BUILD_DIR)/%.o: %.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
-$(PROGRAMS): $(BASE_OBJECTS) $(IM_OBJECTS) $(TR_OBJECTS) $(MV_OBJECTS) $(NUM_OBJECTS) $(SP_OBJECTS) $(CAPI_OBJECTS)
+$(BUILD_DIR)/mvtest.o:demo/mvtest.cc
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+libmv.so: $(CAPI_OBJECTS)  $(BASE_OBJECTS) $(TR_OBJECTS) $(MV_OBJECTS) $(NUM_OBJECTS) $(SP_OBJECTS) $(IMG_OBJECTS)
 	$(CXX) -shared $(CXXFLAGS)  -o $@ $^ $(LDFLAGS)
-
+mvtest:$(PROGRMS) $(BUILD_DIR)/mvtest.o
+	$(CXX)  $(CXXFLAGS) -o $@ $^ -L./ -lmv -lgtest -lgflags -lglog -lspqr -Wl,-Bstatic -lsuitesparseconfig -Wl,-Bdynamic -lrt -Wl,-Bdynamic -lrt -lceres -lgflags -L/scratch/progs/libSuiteSparse/lib  -Wl,-Bstatic -lcholmod -lccolamd -lcamd -lcolamd -lamd -lsuitesparseconfig -lmetis -Wl,-Bdynamic -L /opt/intel/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lintlc -liomp5 -limf -L/scratch/progs/llvm/lib -stdlib=libc++ -lc++abi -lpng
 clean:
-	@rm -rf $(PROGRAMS) *.o
+	@rm -rf $(PROGRAMS) *.o $(BUILD_DIR)/*.o
 
 recompile:clean all
 
