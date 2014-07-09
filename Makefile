@@ -1,6 +1,6 @@
 CXX = clang++
 
-ARCH := core-avx-i
+ARCH := core-avx2
 
 STD  := c++11
 
