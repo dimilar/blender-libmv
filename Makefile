@@ -25,7 +25,7 @@ INCDIR := -I. -I/usr/include/c++/v1 -I/usr/include/eigen3\
 -I./\
 $(shell pkg-config --cflags opencv)
 
-LDDIR  := -L/opt/intel/lib/intel64 -L/opt/intel/mkl/lib/intel64
+LDDIR  := -L/opt/intel/lib/intel64 -L/opt/intel/mkl/lib/intel64 
 
 CXXFLAGS := $(OPT_FLAGS) -std=$(STD) -fopenmp -march=$(ARCH) -Wall -fPIC -DLINUX $(INCDIR) \
 	-DWITH_LIBMV\
