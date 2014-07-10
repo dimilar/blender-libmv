@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
 	libmv_DetectOptions options = {0};
     libmv_Features *features = NULL;
-    Mat im = imread("/scratch/data/haderner/haderner1.jpg", 1);
+    Mat im = imread("./haderner/haderner1.jpg", 1);
     Mat im_resized;
     int feat_num = 0;
     namedWindow("haderner", 1);
