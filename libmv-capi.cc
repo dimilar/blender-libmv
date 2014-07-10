@@ -37,6 +37,7 @@
 #include "libmv-capi.h"
 #include "libmv-util.h"
 
+#include <gflags/gflags.h>
 #include <cassert>
 
 #include "libmv-capi_intern.h"
@@ -112,18 +113,18 @@ void libmv_initLogging(const char *argv0)
 	         google::GLOG_FATAL);
 
 	google::InitGoogleLogging(argv0);
-	google::SetCommandLineOption("logtostderr", "1");
-	google::SetCommandLineOption("v", "0");
-	google::SetCommandLineOption("stderrthreshold", severity_fatal);
-	google::SetCommandLineOption("minloglevel", severity_fatal);
+	gflags::SetCommandLineOption("logtostderr", "1");
+	gflags::SetCommandLineOption("v", "0");
+	gflags::SetCommandLineOption("stderrthreshold", severity_fatal);
+	gflags::SetCommandLineOption("minloglevel", severity_fatal);
 }
 
 void libmv_startDebugLogging(void)
 {
-	google::SetCommandLineOption("logtostderr", "1");
-	google::SetCommandLineOption("v", "2");
-	google::SetCommandLineOption("stderrthreshold", "1");
-	google::SetCommandLineOption("minloglevel", "0");
+	gflags::SetCommandLineOption("logtostderr", "1");
+	gflags::SetCommandLineOption("v", "2");
+	gflags::SetCommandLineOption("stderrthreshold", "1");
+	gflags::SetCommandLineOption("minloglevel", "0");
 }
 
 void libmv_setLoggingVerbosity(int verbosity)
@@ -131,7 +132,7 @@ void libmv_setLoggingVerbosity(int verbosity)
 	char val[10];
 	snprintf(val, sizeof(val), "%d", verbosity);
 
-	google::SetCommandLineOption("v", val);
+	gflags::SetCommandLineOption("v", val);
 }
 
 /* ************ Planar tracker ************ */
