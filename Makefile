@@ -8,7 +8,8 @@ else
     OPT_FLAGS := -O3 -fopenmp -fPIC
 endif
 
-INCDIR := -I. -I/usr/include/c++/v1\
+INCDIR :=\
+	-I/usr/include/c++/v1\
 	-I/usr/include/eigen3\
 	-Ilibmv/base\
 	-Ilibmv/logging\
@@ -32,7 +33,13 @@ CXXFLAGS := $(OPT_FLAGS) -std=$(STD) -fopenmp -Wall -fPIC -DLINUX $(INCDIR) \
 	-DLIBMV_NO_FAST_DETECTOR=
 # -DWITH_LIBMV_GUARDED_ALLOC\
 
-LDFLAGS := $(LDDIR) -stdlib=libc++  -lc++abi
+LDFLAGS := $(LDDIR) 
+
+ifeq "$(CXX)" "clang++"
+	LDFLAGS += -stdlib=libc++ -lc++abi
+else
+	LDFLAGS += -lc++ -lc++abi
+endif
 
 BUILD_DIR = build
 PROGRAMS = libmv.so mvtest
@@ -63,11 +70,11 @@ $(CAPI_OBJECTS):$(BUILD_DIR)/%.o: %.cc
 $(BUILD_DIR)/mvtest.o:demo/mvtest.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 libmv.so: $(CAPI_OBJECTS)  $(BASE_OBJECTS) $(TR_OBJECTS) $(MV_OBJECTS) $(NUM_OBJECTS) $(SP_OBJECTS) $(IMG_OBJECTS)
-	$(CXX) -shared $(CXXFLAGS)  -o $@ $^ $(LDFLAGS) -stdlib=libc++ -lc++abi
+	$(CXX) -shared $(CXXFLAGS)  -o $@ $^ $(LDFLAGS)
 
 
 mvtest: $(PROGRMS) $(BUILD_DIR)/mvtest.o
-	$(CXX)  $(CXXFLAGS) -o $@ $^ $(LDDIR) -lmv -lgtest -lgflags -lglog -lceres $(shell pkg-config --libs opencv) -stdlib=libc++ -lc++abi -lpng
+	$(CXX)  $(CXXFLAGS) -o $@ $^ -lmv -lgtest -lgflags -lglog -lceres $(shell pkg-config --libs opencv) $(LDFLAGS) -lpng
 
 .PHONY: build_dir
 build_dir:
