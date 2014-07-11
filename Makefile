@@ -45,12 +45,12 @@ BUILD_DIR = build
 PROGRAMS = libmv.so mvtest
 all:build_dir $(PROGRAMS)
 
-BASE_OBJECTS = $(patsubst libmv/base/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/base -name \*.cc))
-NUM_OBJECTS = $(patsubst libmv/numeric/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/numeric -name \*.cc))
-SP_OBJECTS = $(patsubst libmv/simple_pipeline/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/simple_pipeline -name \*.cc))
-IMG_OBJECTS = $(patsubst libmv/image/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/image -name \*.cc))
-TR_OBJECTS = $(patsubst libmv/tracking/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/tracking -name \*.cc))
-MV_OBJECTS = $(patsubst libmv/multiview/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/multiview -name \*.cc))
+BASE_OBJECTS = $(patsubst libmv/base/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/base -name \*.cc|grep -v test))
+NUM_OBJECTS = $(patsubst libmv/numeric/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/numeric -name \*.cc|grep -v test))
+SP_OBJECTS = $(patsubst libmv/simple_pipeline/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/simple_pipeline -name \*.cc|grep -v test))
+IMG_OBJECTS = $(patsubst libmv/image/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/image -name \*.cc|grep -v test))
+TR_OBJECTS = $(patsubst libmv/tracking/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/tracking -name \*.cc|grep -v test))
+MV_OBJECTS = $(patsubst libmv/multiview/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/multiview -name \*.cc|grep -v test))
 CAPI_OBJECTS = $(patsubst %.cc,$(BUILD_DIR)/%.o,$(wildcard *.cc))
 
 $(BASE_OBJECTS): $(BUILD_DIR)/%.o: libmv/base/%.cc
