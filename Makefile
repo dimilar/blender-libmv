@@ -23,6 +23,7 @@ INCDIR :=\
 	-Ithird\
 	-I../../intern/guardedalloc\
 	-I./\
+	-Ibli/\
 	$(shell pkg-config --cflags opencv)
 
 LDDIR  := -L/opt/intel/lib/intel64 -L/opt/intel/mkl/lib/intel64 -L./
