@@ -51,13 +51,13 @@
 #include "BLI_string.h"
 #include "BLI_threads.h"
 
-// #include "BLF_translation.h"
+#include "BLF_translation.h"
 
-// #include "BKE_fcurve.h"
-// #include "BKE_tracking.h"
-// #include "BKE_movieclip.h"
-// #include "BKE_object.h"
-// #include "BKE_scene.h"
+#include "BKE_fcurve.h"
+#include "BKE_tracking.h"
+#include "BKE_movieclip.h"
+#include "BKE_object.h"
+#include "BKE_scene.h"
 
 #include "IMB_imbuf_types.h"
 #include "IMB_imbuf.h"
