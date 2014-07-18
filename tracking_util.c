@@ -59,20 +59,20 @@ TracksMap *tracks_map_new(const char *object_name, bool is_camera, int num_track
 {
 	TracksMap *map = MEM_callocN(sizeof(TracksMap), "TrackingsMap");
 
-	BLI_strncpy(map->object_name, object_name, sizeof(map->object_name));
-	map->is_camera = is_camera;
+	// BLI_strncpy(map->object_name, object_name, sizeof(map->object_name));
+	// map->is_camera = is_camera;
 
-	map->num_tracks = num_tracks;
-	map->customdata_size = customdata_size;
+	// map->num_tracks = num_tracks;
+	// map->customdata_size = customdata_size;
 
-	map->tracks = MEM_callocN(sizeof(MovieTrackingTrack) * num_tracks, "TrackingsMap tracks");
+	// map->tracks = MEM_callocN(sizeof(MovieTrackingTrack) * num_tracks, "TrackingsMap tracks");
 
-	if (customdata_size)
-		map->customdata = MEM_callocN(customdata_size * num_tracks, "TracksMap customdata");
+	// if (customdata_size)
+	// 	map->customdata = MEM_callocN(customdata_size * num_tracks, "TracksMap customdata");
 
-	map->hash = BLI_ghash_ptr_new("TracksMap hash");
+	// map->hash = BLI_ghash_ptr_new("TracksMap hash");
 
-	BLI_spin_init(&map->spin_lock);
+	// BLI_spin_init(&map->spin_lock);
 
 	return map;
 }
@@ -94,134 +94,134 @@ void tracks_map_insert(TracksMap *map, MovieTrackingTrack *track, void *customda
 {
 	MovieTrackingTrack new_track = *track;
 
-	new_track.markers = MEM_dupallocN(new_track.markers);
+	// new_track.markers = MEM_dupallocN(new_track.markers);
 
-	map->tracks[map->ptr] = new_track;
+	// map->tracks[map->ptr] = new_track;
 
-	if (customdata)
-		memcpy(&map->customdata[map->ptr * map->customdata_size], customdata, map->customdata_size);
+	// if (customdata)
+	// 	memcpy(&map->customdata[map->ptr * map->customdata_size], customdata, map->customdata_size);
 
-	BLI_ghash_insert(map->hash, &map->tracks[map->ptr], track);
+	// BLI_ghash_insert(map->hash, &map->tracks[map->ptr], track);
 
-	map->ptr++;
+	// map->ptr++;
 }
 
 void tracks_map_merge(TracksMap *map, MovieTracking *tracking)
 {
-	MovieTrackingTrack *track;
-	ListBase tracks = {NULL, NULL}, new_tracks = {NULL, NULL};
-	ListBase *old_tracks;
-	int a;
+	// MovieTrackingTrack *track;
+	// ListBase tracks = {NULL, NULL}, new_tracks = {NULL, NULL};
+	// ListBase *old_tracks;
+	// int a;
 
-	if (map->is_camera) {
-		old_tracks = &tracking->tracks;
-	}
-	else {
-		MovieTrackingObject *object = BKE_tracking_object_get_named(tracking, map->object_name);
+	// if (map->is_camera) {
+	// 	old_tracks = &tracking->tracks;
+	// }
+	// else {
+	// 	MovieTrackingObject *object = BKE_tracking_object_get_named(tracking, map->object_name);
 
-		if (!object) {
-			/* object was deleted by user, create new one */
-			object = BKE_tracking_object_add(tracking, map->object_name);
-		}
+	// 	if (!object) {
+	// 		/* object was deleted by user, create new one */
+	// 		object = BKE_tracking_object_add(tracking, map->object_name);
+	// 	}
 
-		old_tracks = &object->tracks;
-	}
+	// 	old_tracks = &object->tracks;
+	// }
 
-	/* duplicate currently operating tracks to temporary list.
-	 * this is needed to keep names in unique state and it's faster to change names
-	 * of currently operating tracks (if needed)
-	 */
-	for (a = 0; a < map->num_tracks; a++) {
-		MovieTrackingTrack *old_track;
-		bool mapped_to_old = false;
+	// /* duplicate currently operating tracks to temporary list.
+	//  * this is needed to keep names in unique state and it's faster to change names
+	//  * of currently operating tracks (if needed)
+	//  */
+	// for (a = 0; a < map->num_tracks; a++) {
+	// 	MovieTrackingTrack *old_track;
+	// 	bool mapped_to_old = false;
 
-		track = &map->tracks[a];
+	// 	track = &map->tracks[a];
 
-		/* find original of operating track in list of previously displayed tracks */
-		old_track = BLI_ghash_lookup(map->hash, track);
-		if (old_track) {
-			if (BLI_findindex(old_tracks, old_track) != -1) {
-				BLI_remlink(old_tracks, old_track);
+	// 	/* find original of operating track in list of previously displayed tracks */
+	// 	old_track = BLI_ghash_lookup(map->hash, track);
+	// 	if (old_track) {
+	// 		if (BLI_findindex(old_tracks, old_track) != -1) {
+	// 			BLI_remlink(old_tracks, old_track);
 
-				BLI_spin_lock(&map->spin_lock);
+	// 			BLI_spin_lock(&map->spin_lock);
 
-				/* Copy flags like selection back to the track map. */
-				track->flag = old_track->flag;
-				track->pat_flag = old_track->pat_flag;
-				track->search_flag = old_track->search_flag;
+	// 			/* Copy flags like selection back to the track map. */
+	// 			track->flag = old_track->flag;
+	// 			track->pat_flag = old_track->pat_flag;
+	// 			track->search_flag = old_track->search_flag;
 
-				/* Copy all the rest settings back from the map to the actual tracks. */
-				MEM_freeN(old_track->markers);
-				*old_track = *track;
-				old_track->markers = MEM_dupallocN(old_track->markers);
+	// 			/* Copy all the rest settings back from the map to the actual tracks. */
+	// 			MEM_freeN(old_track->markers);
+	// 			*old_track = *track;
+	// 			old_track->markers = MEM_dupallocN(old_track->markers);
 
-				BLI_spin_unlock(&map->spin_lock);
+	// 			BLI_spin_unlock(&map->spin_lock);
 
-				BLI_addtail(&tracks, old_track);
+	// 			BLI_addtail(&tracks, old_track);
 
-				mapped_to_old = true;
-			}
-		}
+	// 			mapped_to_old = true;
+	// 		}
+	// 	}
 
-		if (mapped_to_old == false) {
-			MovieTrackingTrack *new_track = BKE_tracking_track_duplicate(track);
+	// 	if (mapped_to_old == false) {
+	// 		MovieTrackingTrack *new_track = BKE_tracking_track_duplicate(track);
 
-			/* Update old-new track mapping */
-			BLI_ghash_remove(map->hash, track, NULL, NULL);
-			BLI_ghash_insert(map->hash, track, new_track);
+	// 		/* Update old-new track mapping */
+	// 		BLI_ghash_remove(map->hash, track, NULL, NULL);
+	// 		BLI_ghash_insert(map->hash, track, new_track);
 
-			BLI_addtail(&tracks, new_track);
-		}
-	}
+	// 		BLI_addtail(&tracks, new_track);
+	// 	}
+	// }
 
-	/* move all tracks, which aren't operating */
-	track = old_tracks->first;
-	while (track) {
-		MovieTrackingTrack *next = track->next;
-		BLI_addtail(&new_tracks, track);
-		track = next;
-	}
+	// /* move all tracks, which aren't operating */
+	// track = old_tracks->first;
+	// while (track) {
+	// 	MovieTrackingTrack *next = track->next;
+	// 	BLI_addtail(&new_tracks, track);
+	// 	track = next;
+	// }
 
-	/* now move all tracks which are currently operating and keep their names unique */
-	track = tracks.first;
-	while (track) {
-		MovieTrackingTrack *next = track->next;
+	// /* now move all tracks which are currently operating and keep their names unique */
+	// track = tracks.first;
+	// while (track) {
+	// 	MovieTrackingTrack *next = track->next;
 
-		BLI_remlink(&tracks, track);
+	// 	BLI_remlink(&tracks, track);
 
-		track->next = track->prev = NULL;
-		BLI_addtail(&new_tracks, track);
+	// 	track->next = track->prev = NULL;
+	// 	BLI_addtail(&new_tracks, track);
 
-		BLI_uniquename(&new_tracks, track, CTX_DATA_(BLF_I18NCONTEXT_ID_MOVIECLIP, "Track"), '.',
-		               offsetof(MovieTrackingTrack, name), sizeof(track->name));
+	// 	BLI_uniquename(&new_tracks, track, CTX_DATA_(BLF_I18NCONTEXT_ID_MOVIECLIP, "Track"), '.',
+	// 	               offsetof(MovieTrackingTrack, name), sizeof(track->name));
 
-		track = next;
-	}
+	// 	track = next;
+	// }
 
-	*old_tracks = new_tracks;
+	// *old_tracks = new_tracks;
 }
 
 void tracks_map_free(TracksMap *map, void (*customdata_free)(void *customdata))
 {
-	int i = 0;
+	// int i = 0;
 
-	BLI_ghash_free(map->hash, NULL, NULL);
+	// BLI_ghash_free(map->hash, NULL, NULL);
 
-	for (i = 0; i < map->num_tracks; i++) {
-		if (map->customdata && customdata_free)
-			customdata_free(&map->customdata[i * map->customdata_size]);
+	// for (i = 0; i < map->num_tracks; i++) {
+	// 	if (map->customdata && customdata_free)
+	// 		customdata_free(&map->customdata[i * map->customdata_size]);
 
-		BKE_tracking_track_free(&map->tracks[i]);
-	}
+	// 	BKE_tracking_track_free(&map->tracks[i]);
+	// }
 
-	if (map->customdata)
-		MEM_freeN(map->customdata);
+	// if (map->customdata)
+	// 	MEM_freeN(map->customdata);
 
-	MEM_freeN(map->tracks);
+	// MEM_freeN(map->tracks);
 
-	BLI_spin_end(&map->spin_lock);
+	// BLI_spin_end(&map->spin_lock);
 
-	MEM_freeN(map);
+	// MEM_freeN(map);
 }
 
 /*********************** Space transformation functions *************************/

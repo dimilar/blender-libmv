@@ -94,86 +94,86 @@ static void track_context_free(void *customdata)
  * for thread-safe tracking, allowing clip modifications during
  * tracking.
  */
-MovieTrackingContext *BKE_tracking_context_new(MovieClip *clip, MovieClipUser *user,
-                                               const bool backwards, const bool sequence)
-{
-	MovieTrackingContext *context = MEM_callocN(sizeof(MovieTrackingContext), "trackingContext");
-	MovieTracking *tracking = &clip->tracking;
-	MovieTrackingSettings *settings = &tracking->settings;
-	ListBase *tracksbase = BKE_tracking_get_active_tracks(tracking);
-	MovieTrackingTrack *track;
-	MovieTrackingObject *object = BKE_tracking_object_get_active(tracking);
-	int num_tracks = 0;
+// MovieTrackingContext *BKE_tracking_context_new(MovieClip *clip, MovieClipUser *user,
+//                                                const bool backwards, const bool sequence)
+// {
+// 	MovieTrackingContext *context = MEM_callocN(sizeof(MovieTrackingContext), "trackingContext");
+// 	MovieTracking *tracking = &clip->tracking;
+// 	MovieTrackingSettings *settings = &tracking->settings;
+// 	ListBase *tracksbase = BKE_tracking_get_active_tracks(tracking);
+// 	MovieTrackingTrack *track;
+// 	MovieTrackingObject *object = BKE_tracking_object_get_active(tracking);
+// 	int num_tracks = 0;
 
-	context->clip = clip;
-	context->settings = *settings;
-	context->backwards = backwards;
-	context->sync_frame = user->framenr;
-	context->first_time = true;
-	context->first_frame = user->framenr;
-	context->sequence = sequence;
+// 	context->clip = clip;
+// 	context->settings = *settings;
+// 	context->backwards = backwards;
+// 	context->sync_frame = user->framenr;
+// 	context->first_time = true;
+// 	context->first_frame = user->framenr;
+// 	context->sequence = sequence;
 
-	/* count */
-	track = tracksbase->first;
-	while (track) {
-		if (TRACK_SELECTED(track) && (track->flag & (TRACK_LOCKED | TRACK_HIDDEN)) == 0) {
-			int framenr = BKE_movieclip_remap_scene_to_clip_frame(clip, user->framenr);
-			MovieTrackingMarker *marker = BKE_tracking_marker_get(track, framenr);
+// 	/* count */
+// 	track = tracksbase->first;
+// 	while (track) {
+// 		if (TRACK_SELECTED(track) && (track->flag & (TRACK_LOCKED | TRACK_HIDDEN)) == 0) {
+// 			int framenr = BKE_movieclip_remap_scene_to_clip_frame(clip, user->framenr);
+// 			MovieTrackingMarker *marker = BKE_tracking_marker_get(track, framenr);
 
-			if ((marker->flag & MARKER_DISABLED) == 0)
-				num_tracks++;
-		}
+// 			if ((marker->flag & MARKER_DISABLED) == 0)
+// 				num_tracks++;
+// 		}
 
-		track = track->next;
-	}
+// 		track = track->next;
+// 	}
 
-	/* create tracking contextx for all tracks which would be tracked */
-	if (num_tracks) {
-		int width, height;
+// 	/* create tracking contextx for all tracks which would be tracked */
+// 	if (num_tracks) {
+// 		int width, height;
 
-		context->tracks_map = tracks_map_new(object->name, object->flag & TRACKING_OBJECT_CAMERA,
-		                                     num_tracks, sizeof(TrackContext));
+// 		context->tracks_map = tracks_map_new(object->name, object->flag & TRACKING_OBJECT_CAMERA,
+// 		                                     num_tracks, sizeof(TrackContext));
 
-		BKE_movieclip_get_size(clip, user, &width, &height);
+// 		BKE_movieclip_get_size(clip, user, &width, &height);
 
-		/* create tracking data */
-		track = tracksbase->first;
-		while (track) {
-			if (TRACK_SELECTED(track) && (track->flag & (TRACK_HIDDEN | TRACK_LOCKED)) == 0) {
-				int framenr = BKE_movieclip_remap_scene_to_clip_frame(clip, user->framenr);
-				MovieTrackingMarker *marker = BKE_tracking_marker_get(track, framenr);
+// 		/* create tracking data */
+// 		track = tracksbase->first;
+// 		while (track) {
+// 			if (TRACK_SELECTED(track) && (track->flag & (TRACK_HIDDEN | TRACK_LOCKED)) == 0) {
+// 				int framenr = BKE_movieclip_remap_scene_to_clip_frame(clip, user->framenr);
+// 				MovieTrackingMarker *marker = BKE_tracking_marker_get(track, framenr);
 
-				if ((marker->flag & MARKER_DISABLED) == 0) {
-					TrackContext track_context;
-					memset(&track_context, 0, sizeof(TrackContext));
-					tracks_map_insert(context->tracks_map, track, &track_context);
-				}
-			}
+// 				if ((marker->flag & MARKER_DISABLED) == 0) {
+// 					TrackContext track_context;
+// 					memset(&track_context, 0, sizeof(TrackContext));
+// 					tracks_map_insert(context->tracks_map, track, &track_context);
+// 				}
+// 			}
 
-			track = track->next;
-		}
-	}
+// 			track = track->next;
+// 		}
+// 	}
 
-	/* store needed clip flags passing to get_buffer functions
-	 * - MCLIP_USE_PROXY is needed to because timecode affects on movie clip
-	 *   only in case Proxy/Timecode flag is set, so store this flag to use
-	 *   timecodes properly but reset render size to SIZE_FULL so correct resolution
-	 *   would be used for images
-	 * - MCLIP_USE_PROXY_CUSTOM_DIR is needed because proxy/timecode files might
-	 *   be stored in a different location
-	 * ignore all the rest possible flags for now
-	 */
-	context->clip_flag = clip->flag & MCLIP_TIMECODE_FLAGS;
+// 	/* store needed clip flags passing to get_buffer functions
+// 	 * - MCLIP_USE_PROXY is needed to because timecode affects on movie clip
+// 	 *   only in case Proxy/Timecode flag is set, so store this flag to use
+// 	 *   timecodes properly but reset render size to SIZE_FULL so correct resolution
+// 	 *   would be used for images
+// 	 * - MCLIP_USE_PROXY_CUSTOM_DIR is needed because proxy/timecode files might
+// 	 *   be stored in a different location
+// 	 * ignore all the rest possible flags for now
+// 	 */
+// 	context->clip_flag = clip->flag & MCLIP_TIMECODE_FLAGS;
 
-	context->user = *user;
-	context->user.render_size = MCLIP_PROXY_RENDER_SIZE_FULL;
-	context->user.render_flag = 0;
+// 	context->user = *user;
+// 	context->user.render_size = MCLIP_PROXY_RENDER_SIZE_FULL;
+// 	context->user.render_flag = 0;
 
-	if (!sequence)
-		BLI_begin_threaded_malloc();
+// 	if (!sequence)
+// 		BLI_begin_threaded_malloc();
 
-	return context;
-}
+// 	return context;
+// }
 
 /* Free context used for tracking. */
 void BKE_tracking_context_free(MovieTrackingContext *context)
@@ -604,199 +604,199 @@ static bool configure_and_run_tracker(ImBuf *destination_ibuf, MovieTrackingTrac
 /* Track all the tracks from context one more frame,
  * returns FALSe if nothing was tracked.
  */
-bool BKE_tracking_context_step(MovieTrackingContext *context)
-{
-	ImBuf *destination_ibuf;
-	int frame_delta = context->backwards ? -1 : 1;
-	int curfra =  BKE_movieclip_remap_scene_to_clip_frame(context->clip, context->user.framenr);
-	int a, map_size;
-	bool ok = false;
+// bool BKE_tracking_context_step(MovieTrackingContext *context)
+// {
+// 	ImBuf *destination_ibuf;
+// 	int frame_delta = context->backwards ? -1 : 1;
+// 	int curfra =  BKE_movieclip_remap_scene_to_clip_frame(context->clip, context->user.framenr);
+// 	int a, map_size;
+// 	bool ok = false;
 
-	int frame_width, frame_height;
+// 	int frame_width, frame_height;
 
-	map_size = tracks_map_get_size(context->tracks_map);
+// 	map_size = tracks_map_get_size(context->tracks_map);
 
-	/* Nothing to track, avoid unneeded frames reading to save time and memory. */
-	if (!map_size)
-		return false;
+// 	/* Nothing to track, avoid unneeded frames reading to save time and memory. */
+// 	if (!map_size)
+// 		return false;
 
-	/* Get an image buffer for frame we're tracking to. */
-	context->user.framenr += frame_delta;
+// 	/* Get an image buffer for frame we're tracking to. */
+// 	context->user.framenr += frame_delta;
 
-	destination_ibuf = BKE_movieclip_get_ibuf_flag(context->clip, &context->user,
-	                                               context->clip_flag, MOVIECLIP_CACHE_SKIP);
-	if (!destination_ibuf)
-		return false;
+// 	destination_ibuf = BKE_movieclip_get_ibuf_flag(context->clip, &context->user,
+// 	                                               context->clip_flag, MOVIECLIP_CACHE_SKIP);
+// 	if (!destination_ibuf)
+// 		return false;
 
-	frame_width = destination_ibuf->x;
-	frame_height = destination_ibuf->y;
+// 	frame_width = destination_ibuf->x;
+// 	frame_height = destination_ibuf->y;
 
-#pragma omp parallel for private(a) shared(destination_ibuf, ok) if (map_size > 1)
-	for (a = 0; a < map_size; a++) {
-		TrackContext *track_context = NULL;
-		MovieTrackingTrack *track;
-		MovieTrackingMarker *marker;
+// #pragma omp parallel for private(a) shared(destination_ibuf, ok) if (map_size > 1)
+// 	for (a = 0; a < map_size; a++) {
+// 		TrackContext *track_context = NULL;
+// 		MovieTrackingTrack *track;
+// 		MovieTrackingMarker *marker;
 
-		tracks_map_get_indexed_element(context->tracks_map, a, &track, (void **)&track_context);
+// 		tracks_map_get_indexed_element(context->tracks_map, a, &track, (void **)&track_context);
 
-		marker = BKE_tracking_marker_get_exact(track, curfra);
+// 		marker = BKE_tracking_marker_get_exact(track, curfra);
 
-		if (marker && (marker->flag & MARKER_DISABLED) == 0) {
-			bool tracked = false, need_readjust;
-			double dst_pixel_x[5], dst_pixel_y[5];
+// 		if (marker && (marker->flag & MARKER_DISABLED) == 0) {
+// 			bool tracked = false, need_readjust;
+// 			double dst_pixel_x[5], dst_pixel_y[5];
 
-			if (track->pattern_match == TRACK_MATCH_KEYFRAME)
-				need_readjust = context->first_time;
-			else
-				need_readjust = true;
+// 			if (track->pattern_match == TRACK_MATCH_KEYFRAME)
+// 				need_readjust = context->first_time;
+// 			else
+// 				need_readjust = true;
 
-			/* do not track markers which are too close to boundary */
-			if (tracking_check_marker_margin(track, marker, frame_width, frame_height)) {
-				if (need_readjust) {
-					if (track_context_update_reference(context, track_context, track, marker,
-					                                   curfra, frame_width, frame_height) == false)
-					{
-						/* happens when reference frame fails to be loaded */
-						continue;
-					}
-				}
+// 			/* do not track markers which are too close to boundary */
+// 			if (tracking_check_marker_margin(track, marker, frame_width, frame_height)) {
+// 				if (need_readjust) {
+// 					if (track_context_update_reference(context, track_context, track, marker,
+// 					                                   curfra, frame_width, frame_height) == false)
+// 					{
+// 						/* happens when reference frame fails to be loaded */
+// 						continue;
+// 					}
+// 				}
 
-				tracked = configure_and_run_tracker(destination_ibuf, track,
-				                                    &track_context->reference_marker, marker,
-				                                    track_context->search_area,
-				                                    track_context->search_area_width,
-				                                    track_context->search_area_height,
-				                                    track_context->mask,
-				                                    dst_pixel_x, dst_pixel_y);
-			}
+// 				tracked = configure_and_run_tracker(destination_ibuf, track,
+// 				                                    &track_context->reference_marker, marker,
+// 				                                    track_context->search_area,
+// 				                                    track_context->search_area_width,
+// 				                                    track_context->search_area_height,
+// 				                                    track_context->mask,
+// 				                                    dst_pixel_x, dst_pixel_y);
+// 			}
 
-			BLI_spin_lock(&context->tracks_map->spin_lock);
-			tracking_insert_new_marker(context, track, marker, curfra, tracked,
-			                           frame_width, frame_height, dst_pixel_x, dst_pixel_y);
-			BLI_spin_unlock(&context->tracks_map->spin_lock);
+// 			BLI_spin_lock(&context->tracks_map->spin_lock);
+// 			tracking_insert_new_marker(context, track, marker, curfra, tracked,
+// 			                           frame_width, frame_height, dst_pixel_x, dst_pixel_y);
+// 			BLI_spin_unlock(&context->tracks_map->spin_lock);
 
-			ok = true;
-		}
-	}
+// 			ok = true;
+// 		}
+// 	}
 
-	IMB_freeImBuf(destination_ibuf);
+// 	IMB_freeImBuf(destination_ibuf);
 
-	context->first_time = false;
-	context->frames++;
+// 	context->first_time = false;
+// 	context->frames++;
 
-	return ok;
-}
+// 	return ok;
+// }
 
-void BKE_tracking_context_finish(MovieTrackingContext *context)
-{
-	MovieClip *clip = context->clip;
-	ListBase *plane_tracks_base = BKE_tracking_get_active_plane_tracks(&clip->tracking);
-	MovieTrackingPlaneTrack *plane_track;
-	int map_size = tracks_map_get_size(context->tracks_map);
+// void BKE_tracking_context_finish(MovieTrackingContext *context)
+// {
+// 	MovieClip *clip = context->clip;
+// 	ListBase *plane_tracks_base = BKE_tracking_get_active_plane_tracks(&clip->tracking);
+// 	MovieTrackingPlaneTrack *plane_track;
+// 	int map_size = tracks_map_get_size(context->tracks_map);
 
-	for (plane_track = plane_tracks_base->first;
-	     plane_track;
-	     plane_track = plane_track->next)
-	{
-		if ((plane_track->flag & PLANE_TRACK_AUTOKEY) == 0) {
-			int i;
-			for (i = 0; i < map_size; i++) {
-				TrackContext *track_context = NULL;
-				MovieTrackingTrack *track, *old_track;
-				bool do_update = false;
-				int j;
+// 	for (plane_track = plane_tracks_base->first;
+// 	     plane_track;
+// 	     plane_track = plane_track->next)
+// 	{
+// 		if ((plane_track->flag & PLANE_TRACK_AUTOKEY) == 0) {
+// 			int i;
+// 			for (i = 0; i < map_size; i++) {
+// 				TrackContext *track_context = NULL;
+// 				MovieTrackingTrack *track, *old_track;
+// 				bool do_update = false;
+// 				int j;
 
-				tracks_map_get_indexed_element(context->tracks_map, i, &track, (void **)&track_context);
+// 				tracks_map_get_indexed_element(context->tracks_map, i, &track, (void **)&track_context);
 
-				old_track = BLI_ghash_lookup(context->tracks_map->hash, track);
-				for (j = 0; j < plane_track->point_tracksnr; j++) {
-					if (plane_track->point_tracks[j] == old_track) {
-						do_update = true;
-						break;
-					}
-				}
+// 				old_track = BLI_ghash_lookup(context->tracks_map->hash, track);
+// 				for (j = 0; j < plane_track->point_tracksnr; j++) {
+// 					if (plane_track->point_tracks[j] == old_track) {
+// 						do_update = true;
+// 						break;
+// 					}
+// 				}
 
-				if (do_update) {
-					BKE_tracking_track_plane_from_existing_motion(plane_track, context->first_frame);
-					break;
-				}
-			}
-		}
-	}
-}
+// 				if (do_update) {
+// 					BKE_tracking_track_plane_from_existing_motion(plane_track, context->first_frame);
+// 					break;
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
 /* Refine marker's position using previously known keyframe.
  * Direction of searching for a keyframe depends on backwards flag,
  * which means if backwards is false, previous keyframe will be as
  * reference.
  */
-void BKE_tracking_refine_marker(MovieClip *clip, MovieTrackingTrack *track, MovieTrackingMarker *marker, bool backwards)
-{
-	MovieTrackingMarker *reference_marker = NULL;
-	ImBuf *reference_ibuf, *destination_ibuf;
-	float *search_area, *mask = NULL;
-	int frame_width, frame_height;
-	int search_area_height, search_area_width;
-	int clip_flag = clip->flag & MCLIP_TIMECODE_FLAGS;
-	int reference_framenr;
-	MovieClipUser user = {0};
-	double dst_pixel_x[5], dst_pixel_y[5];
-	bool tracked;
+// void BKE_tracking_refine_marker(MovieClip *clip, MovieTrackingTrack *track, MovieTrackingMarker *marker, bool backwards)
+// {
+// 	MovieTrackingMarker *reference_marker = NULL;
+// 	ImBuf *reference_ibuf, *destination_ibuf;
+// 	float *search_area, *mask = NULL;
+// 	int frame_width, frame_height;
+// 	int search_area_height, search_area_width;
+// 	int clip_flag = clip->flag & MCLIP_TIMECODE_FLAGS;
+// 	int reference_framenr;
+// 	MovieClipUser user = {0};
+// 	double dst_pixel_x[5], dst_pixel_y[5];
+// 	bool tracked;
 
-	/* Construct a temporary clip used, used to acquire image buffers. */
-	user.framenr = BKE_movieclip_remap_clip_to_scene_frame(clip, marker->framenr);
+// 	/* Construct a temporary clip used, used to acquire image buffers. */
+// 	user.framenr = BKE_movieclip_remap_clip_to_scene_frame(clip, marker->framenr);
 
-	BKE_movieclip_get_size(clip, &user, &frame_width, &frame_height);
+// 	BKE_movieclip_get_size(clip, &user, &frame_width, &frame_height);
 
-	/* Get an image buffer for reference frame, also gets reference marker.
-	 *
-	 * Usually tracking_context_get_reference_ibuf will return current frame
-	 * if marker is keyframed, which is correct for normal tracking. But here
-	 * we'll want to have next/previous frame in such cases. So let's use small
-	 * magic with original frame number used to get reference frame for.
-	 */
-	reference_framenr = backwards ? marker->framenr + 1 : marker->framenr - 1;
-	reference_ibuf = tracking_context_get_reference_ibuf(clip, &user, clip_flag, track, reference_framenr,
-	                                                     backwards, &reference_marker);
-	if (reference_ibuf == NULL) {
-		return;
-	}
+// 	/* Get an image buffer for reference frame, also gets reference marker.
+// 	 *
+// 	 * Usually tracking_context_get_reference_ibuf will return current frame
+// 	 * if marker is keyframed, which is correct for normal tracking. But here
+// 	 * we'll want to have next/previous frame in such cases. So let's use small
+// 	 * magic with original frame number used to get reference frame for.
+// 	 */
+// 	reference_framenr = backwards ? marker->framenr + 1 : marker->framenr - 1;
+// 	reference_ibuf = tracking_context_get_reference_ibuf(clip, &user, clip_flag, track, reference_framenr,
+// 	                                                     backwards, &reference_marker);
+// 	if (reference_ibuf == NULL) {
+// 		return;
+// 	}
 
-	/* Could not refine with self. */
-	if (reference_marker == marker) {
-		return;
-	}
+// 	/* Could not refine with self. */
+// 	if (reference_marker == marker) {
+// 		return;
+// 	}
 
-	/* Destination image buffer has got frame number corresponding to refining marker. */
-	destination_ibuf = BKE_movieclip_get_ibuf_flag(clip, &user, clip_flag, MOVIECLIP_CACHE_SKIP);
-	if (destination_ibuf == NULL) {
-		IMB_freeImBuf(reference_ibuf);
-		return;
-	}
+// 	/* Destination image buffer has got frame number corresponding to refining marker. */
+// 	destination_ibuf = BKE_movieclip_get_ibuf_flag(clip, &user, clip_flag, MOVIECLIP_CACHE_SKIP);
+// 	if (destination_ibuf == NULL) {
+// 		IMB_freeImBuf(reference_ibuf);
+// 		return;
+// 	}
 
-	/* Get search area from reference image. */
-	search_area = track_get_search_floatbuf(reference_ibuf, track, reference_marker,
-	                                        &search_area_width, &search_area_height);
+// 	/* Get search area from reference image. */
+// 	search_area = track_get_search_floatbuf(reference_ibuf, track, reference_marker,
+// 	                                        &search_area_width, &search_area_height);
 
-	/* If needed, compute track's mask. */
-	if ((track->algorithm_flag & TRACK_ALGORITHM_FLAG_USE_MASK) != 0)
-		mask = BKE_tracking_track_get_mask(frame_width, frame_height, track, marker);
+// 	/* If needed, compute track's mask. */
+// 	if ((track->algorithm_flag & TRACK_ALGORITHM_FLAG_USE_MASK) != 0)
+// 		mask = BKE_tracking_track_get_mask(frame_width, frame_height, track, marker);
 
-	/* Run the tracker from reference frame to current one. */
-	tracked = configure_and_run_tracker(destination_ibuf, track, reference_marker, marker,
-	                                    search_area, search_area_width, search_area_height,
-	                                    mask, dst_pixel_x, dst_pixel_y);
+// 	/* Run the tracker from reference frame to current one. */
+// 	tracked = configure_and_run_tracker(destination_ibuf, track, reference_marker, marker,
+// 	                                    search_area, search_area_width, search_area_height,
+// 	                                    mask, dst_pixel_x, dst_pixel_y);
 
-	/* Refine current marker's position if track was successful. */
-	if (tracked) {
-		tracking_set_marker_coords_from_tracking(frame_width, frame_height, marker, dst_pixel_x, dst_pixel_y);
-		marker->flag |= MARKER_TRACKED;
-	}
+// 	/* Refine current marker's position if track was successful. */
+// 	if (tracked) {
+// 		tracking_set_marker_coords_from_tracking(frame_width, frame_height, marker, dst_pixel_x, dst_pixel_y);
+// 		marker->flag |= MARKER_TRACKED;
+// 	}
 
-	/* Free memory used for refining */
-	MEM_freeN(search_area);
-	if (mask)
-		MEM_freeN(mask);
-	IMB_freeImBuf(reference_ibuf);
-	IMB_freeImBuf(destination_ibuf);
-}
+// 	/* Free memory used for refining */
+// 	MEM_freeN(search_area);
+// 	if (mask)
+// 		MEM_freeN(mask);
+// 	IMB_freeImBuf(reference_ibuf);
+// 	IMB_freeImBuf(destination_ibuf);
+// }

@@ -212,77 +212,77 @@ struct BuildDirCtx {
 /**
  * Scans the directory named *dirname and appends entries for its contents to files.
  */
-static void bli_builddir(struct BuildDirCtx *dir_ctx, const char *dirname)
-{
-	struct ListBase dirbase = {NULL, NULL};
-	int newnum = 0;
-	DIR *dir;
+// static void bli_builddir(struct BuildDirCtx *dir_ctx, const char *dirname)
+// {
+// 	struct ListBase dirbase = {NULL, NULL};
+// 	int newnum = 0;
+// 	DIR *dir;
 
-	if ((dir = opendir(dirname)) != NULL) {
+// 	if ((dir = opendir(dirname)) != NULL) {
 
-		const struct dirent *fname;
-		while ((fname = readdir(dir)) != NULL) {
-			struct dirlink * const dlink = (struct dirlink *)malloc(sizeof(struct dirlink));
-			if (dlink != NULL) {
-				dlink->name = BLI_strdup(fname->d_name);
-				BLI_addhead(&dirbase, dlink);
-				newnum++;
-			}
-		}
+// 		const struct dirent *fname;
+// 		while ((fname = readdir(dir)) != NULL) {
+// 			struct dirlink * const dlink = (struct dirlink *)malloc(sizeof(struct dirlink));
+// 			if (dlink != NULL) {
+// 				dlink->name = BLI_strdup(fname->d_name);
+// 				BLI_addhead(&dirbase, dlink);
+// 				newnum++;
+// 			}
+// 		}
 
-		if (newnum) {
+// 		if (newnum) {
 
-			if (dir_ctx->files) {
-				void * const tmp = realloc(dir_ctx->files, (dir_ctx->nrfiles + newnum) * sizeof(struct direntry));
-				if (tmp) {
-					dir_ctx->files = (struct direntry *)tmp;
-				}
-				else { /* realloc fail */
-					free(dir_ctx->files);
-					dir_ctx->files = NULL;
-				}
-			}
+// 			if (dir_ctx->files) {
+// 				void * const tmp = realloc(dir_ctx->files, (dir_ctx->nrfiles + newnum) * sizeof(struct direntry));
+// 				if (tmp) {
+// 					dir_ctx->files = (struct direntry *)tmp;
+// 				}
+// 				else { /* realloc fail */
+// 					free(dir_ctx->files);
+// 					dir_ctx->files = NULL;
+// 				}
+// 			}
 			
-			if (dir_ctx->files == NULL)
-				dir_ctx->files = (struct direntry *)malloc(newnum * sizeof(struct direntry));
+// 			if (dir_ctx->files == NULL)
+// 				dir_ctx->files = (struct direntry *)malloc(newnum * sizeof(struct direntry));
 
-			if (dir_ctx->files) {
-				struct dirlink * dlink = (struct dirlink *) dirbase.first;
-				struct direntry *file = &dir_ctx->files[dir_ctx->nrfiles];
-				while (dlink) {
-					char fullname[PATH_MAX];
-					memset(file, 0, sizeof(struct direntry));
-					file->relname = dlink->name;
-					file->path = BLI_strdupcat(dirname, dlink->name);
-					BLI_join_dirfile(fullname, sizeof(fullname), dirname, dlink->name);
-					BLI_stat(fullname, &file->s);
-					file->type = file->s.st_mode;
-					file->flags = 0;
-					dir_ctx->nrfiles++;
-					file++;
-					dlink = dlink->next;
-				}
-			}
-			else {
-				printf("Couldn't get memory for dir\n");
-				exit(1);
-			}
+// 			if (dir_ctx->files) {
+// 				struct dirlink * dlink = (struct dirlink *) dirbase.first;
+// 				struct direntry *file = &dir_ctx->files[dir_ctx->nrfiles];
+// 				while (dlink) {
+// 					char fullname[PATH_MAX];
+// 					memset(file, 0, sizeof(struct direntry));
+// 					file->relname = dlink->name;
+// 					file->path = BLI_strdupcat(dirname, dlink->name);
+// 					BLI_join_dirfile(fullname, sizeof(fullname), dirname, dlink->name);
+// 					BLI_stat(fullname, &file->s);
+// 					file->type = file->s.st_mode;
+// 					file->flags = 0;
+// 					dir_ctx->nrfiles++;
+// 					file++;
+// 					dlink = dlink->next;
+// 				}
+// 			}
+// 			else {
+// 				printf("Couldn't get memory for dir\n");
+// 				exit(1);
+// 			}
 
-			BLI_freelist(&dirbase);
-			if (dir_ctx->files) {
-				qsort(dir_ctx->files, dir_ctx->nrfiles, sizeof(struct direntry), (int (*)(const void *, const void *))bli_compare);
-			}
-		}
-		else {
-			printf("%s empty directory\n", dirname);
-		}
+// 			BLI_freelist(&dirbase);
+// 			if (dir_ctx->files) {
+// 				qsort(dir_ctx->files, dir_ctx->nrfiles, sizeof(struct direntry), (int (*)(const void *, const void *))bli_compare);
+// 			}
+// 		}
+// 		else {
+// 			printf("%s empty directory\n", dirname);
+// 		}
 
-		closedir(dir);
-	}
-	else {
-		printf("%s non-existant directory\n", dirname);
-	}
-}
+// 		closedir(dir);
+// 	}
+// 	else {
+// 		printf("%s non-existant directory\n", dirname);
+// 	}
+// }
 
 /**
  * Fills in the "mode[123]", "size" and "string" fields in the elements of the files
@@ -387,46 +387,46 @@ static void bli_adddirstrings(struct BuildDirCtx *dir_ctx)
  * Scans the contents of the directory named *dirname, and allocates and fills in an
  * array of entries describing them in *filelist. The length of the array is the function result.
  */
-unsigned int BLI_dir_contents(const char *dirname,  struct direntry **filelist)
-{
-	struct BuildDirCtx dir_ctx;
+// unsigned int BLI_dir_contents(const char *dirname,  struct direntry **filelist)
+// {
+// 	struct BuildDirCtx dir_ctx;
 
-	dir_ctx.nrfiles = 0;
-	dir_ctx.files = NULL;
+// 	dir_ctx.nrfiles = 0;
+// 	dir_ctx.files = NULL;
 
-	bli_builddir(&dir_ctx, dirname);
-	bli_adddirstrings(&dir_ctx);
+// 	bli_builddir(&dir_ctx, dirname);
+// 	bli_adddirstrings(&dir_ctx);
 
-	if (dir_ctx.files) {
-		*filelist = dir_ctx.files;
-	}
-	else {
-		// keep blender happy. Blender stores this in a variable
-		// where 0 has special meaning.....
-		*filelist = malloc(sizeof(struct direntry));
-	}
+// 	if (dir_ctx.files) {
+// 		*filelist = dir_ctx.files;
+// 	}
+// 	else {
+// 		// keep blender happy. Blender stores this in a variable
+// 		// where 0 has special meaning.....
+// 		*filelist = malloc(sizeof(struct direntry));
+// 	}
 
-	return dir_ctx.nrfiles;
-}
+// 	return dir_ctx.nrfiles;
+// }
 
 /* frees storage for an array of direntries, including the array itself. */
-void BLI_free_filelist(struct direntry *filelist, unsigned int nrentries)
-{
-	unsigned int i;
-	for (i = 0; i < nrentries; ++i) {
-		struct direntry * const entry = filelist + i;
-		if (entry->image) {
-			IMB_freeImBuf(entry->image);
-		}
-		if (entry->relname)
-			MEM_freeN(entry->relname);
-		if (entry->path)
-			MEM_freeN(entry->path);
-		/* entry->poin assumed not to point to anything needing freeing here */
-	}
+// void BLI_free_filelist(struct direntry *filelist, unsigned int nrentries)
+// {
+// 	unsigned int i;
+// 	for (i = 0; i < nrentries; ++i) {
+// 		struct direntry * const entry = filelist + i;
+// 		if (entry->image) {
+// 			IMB_freeImBuf(entry->image);
+// 		}
+// 		if (entry->relname)
+// 			MEM_freeN(entry->relname);
+// 		if (entry->path)
+// 			MEM_freeN(entry->path);
+// 		/* entry->poin assumed not to point to anything needing freeing here */
+// 	}
 
-	free(filelist);
-}
+// 	free(filelist);
+// }
 
 
 /**
@@ -551,58 +551,58 @@ bool BLI_is_file(const char *path)
 /**
  * Reads the contents of a text file and returns the lines in a linked list.
  */
-LinkNode *BLI_file_read_as_lines(const char *name)
-{
-	FILE *fp = BLI_fopen(name, "r");
-	LinkNode *lines = NULL;
-	char *buf;
-	size_t size;
+// LinkNode *BLI_file_read_as_lines(const char *name)
+// {
+// 	FILE *fp = BLI_fopen(name, "r");
+// 	LinkNode *lines = NULL;
+// 	char *buf;
+// 	size_t size;
 
-	if (!fp) return NULL;
+// 	if (!fp) return NULL;
 		
-	fseek(fp, 0, SEEK_END);
-	size = (size_t)ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+// 	fseek(fp, 0, SEEK_END);
+// 	size = (size_t)ftell(fp);
+// 	fseek(fp, 0, SEEK_SET);
 
-	buf = MEM_mallocN(size, "file_as_lines");
-	if (buf) {
-		size_t i, last = 0;
+// 	buf = MEM_mallocN(size, "file_as_lines");
+// 	if (buf) {
+// 		size_t i, last = 0;
 		
-		/*
-		 * size = because on win32 reading
-		 * all the bytes in the file will return
-		 * less bytes because of crnl changes.
-		 */
-		size = fread(buf, 1, size, fp);
-		for (i = 0; i <= size; i++) {
-			if (i == size || buf[i] == '\n') {
-				char *line = BLI_strdupn(&buf[last], i - last);
+// 		/*
+// 		 * size = because on win32 reading
+// 		 * all the bytes in the file will return
+// 		 * less bytes because of crnl changes.
+// 		 */
+// 		size = fread(buf, 1, size, fp);
+// 		for (i = 0; i <= size; i++) {
+// 			if (i == size || buf[i] == '\n') {
+// 				char *line = BLI_strdupn(&buf[last], i - last);
 
-				BLI_linklist_prepend(&lines, line);
-				/* faster to build singly-linked list in reverse order */
-				/* alternatively, could process buffer in reverse order so
-				 * list ends up right way round to start with */
-				last = i + 1;
-			}
-		}
+// 				BLI_linklist_prepend(&lines, line);
+// 				/* faster to build singly-linked list in reverse order */
+// 				/* alternatively, could process buffer in reverse order so
+// 				 * list ends up right way round to start with */
+// 				last = i + 1;
+// 			}
+// 		}
 		
-		MEM_freeN(buf);
-	}
+// 		MEM_freeN(buf);
+// 	}
 	
-	fclose(fp);
+// 	fclose(fp);
 
-	/* get them the right way round */
-	BLI_linklist_reverse(&lines);
-	return lines;
-}
+// 	/* get them the right way round */
+// 	BLI_linklist_reverse(&lines);
+// 	return lines;
+// }
 
 /*
  * Frees memory from a previous call to BLI_file_read_as_lines.
  */
-void BLI_file_free_lines(LinkNode *lines)
-{
-	BLI_linklist_freeN(lines);
-}
+// void BLI_file_free_lines(LinkNode *lines)
+// {
+// 	BLI_linklist_freeN(lines);
+// }
 
 /** is file1 older then file2 */
 bool BLI_file_older(const char *file1, const char *file2)

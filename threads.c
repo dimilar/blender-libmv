@@ -162,55 +162,55 @@ void BLI_threadapi_exit(void)
 	BLI_spin_end(&_malloc_lock);
 }
 
-TaskScheduler *BLI_task_scheduler_get(void)
-{
-	if (task_scheduler == NULL) {
-		int tot_thread = BLI_system_thread_count();
+// TaskScheduler *BLI_task_scheduler_get(void)
+// {
+// 	if (task_scheduler == NULL) {
+// 		int tot_thread = BLI_system_thread_count();
 
-		/* Do a lazy initialization, so it happens after
-		 * command line arguments parsing
-		 */
-		task_scheduler = BLI_task_scheduler_create(tot_thread);
-	}
+// 		/* Do a lazy initialization, so it happens after
+// 		 * command line arguments parsing
+// 		 */
+// 		task_scheduler = BLI_task_scheduler_create(tot_thread);
+// 	}
 
-	return task_scheduler;
-}
+// 	return task_scheduler;
+// }
 
 /* tot = 0 only initializes malloc mutex in a safe way (see sequence.c)
  * problem otherwise: scene render will kill of the mutex!
  */
 
-void BLI_init_threads(ListBase *threadbase, void *(*do_thread)(void *), int tot)
-{
-	int a;
+// void BLI_init_threads(ListBase *threadbase, void *(*do_thread)(void *), int tot)
+// {
+// 	int a;
 
-	if (threadbase != NULL && tot > 0) {
-		BLI_listbase_clear(threadbase);
+// 	if (threadbase != NULL && tot > 0) {
+// 		BLI_listbase_clear(threadbase);
 	
-		if (tot > RE_MAX_THREAD) tot = RE_MAX_THREAD;
-		else if (tot < 1) tot = 1;
+// 		if (tot > RE_MAX_THREAD) tot = RE_MAX_THREAD;
+// 		else if (tot < 1) tot = 1;
 	
-		for (a = 0; a < tot; a++) {
-			ThreadSlot *tslot = MEM_callocN(sizeof(ThreadSlot), "threadslot");
-			BLI_addtail(threadbase, tslot);
-			tslot->do_thread = do_thread;
-			tslot->avail = 1;
-		}
-	}
+// 		for (a = 0; a < tot; a++) {
+// 			ThreadSlot *tslot = MEM_callocN(sizeof(ThreadSlot), "threadslot");
+// 			BLI_addtail(threadbase, tslot);
+// 			tslot->do_thread = do_thread;
+// 			tslot->avail = 1;
+// 		}
+// 	}
 	
-	if (thread_levels == 0) {
-		MEM_set_lock_callback(BLI_lock_malloc_thread, BLI_unlock_malloc_thread);
+// 	if (thread_levels == 0) {
+// 		MEM_set_lock_callback(BLI_lock_malloc_thread, BLI_unlock_malloc_thread);
 
-#ifdef USE_APPLE_OMP_FIX
-		/* workaround for Apple gcc 4.2.1 omp vs background thread bug,
-		 * we copy gomp thread local storage pointer to setting it again
-		 * inside the thread that we start */
-		thread_tls_data = pthread_getspecific(gomp_tls_key);
-#endif
-	}
+// #ifdef USE_APPLE_OMP_FIX
+// 		/* workaround for Apple gcc 4.2.1 omp vs background thread bug,
+// 		 * we copy gomp thread local storage pointer to setting it again
+// 		 * inside the thread that we start */
+// 		thread_tls_data = pthread_getspecific(gomp_tls_key);
+// #endif
+// 	}
 
-	thread_levels++;
-}
+// 	thread_levels++;
+// }
 
 /* amount of available threads */
 int BLI_available_threads(ListBase *threadbase)
@@ -312,26 +312,26 @@ void BLI_remove_threads(ListBase *threadbase)
 	}
 }
 
-void BLI_end_threads(ListBase *threadbase)
-{
-	ThreadSlot *tslot;
+// void BLI_end_threads(ListBase *threadbase)
+// {
+// 	ThreadSlot *tslot;
 	
-	/* only needed if there's actually some stuff to end
-	 * this way we don't end up decrementing thread_levels on an empty threadbase 
-	 * */
-	if (threadbase && (BLI_listbase_is_empty(threadbase) == false)) {
-		for (tslot = threadbase->first; tslot; tslot = tslot->next) {
-			if (tslot->avail == 0) {
-				pthread_join(tslot->pthread, NULL);
-			}
-		}
-		BLI_freelistN(threadbase);
-	}
+// 	/* only needed if there's actually some stuff to end
+// 	 * this way we don't end up decrementing thread_levels on an empty threadbase 
+// 	 * */
+// 	if (threadbase && (BLI_listbase_is_empty(threadbase) == false)) {
+// 		for (tslot = threadbase->first; tslot; tslot = tslot->next) {
+// 			if (tslot->avail == 0) {
+// 				pthread_join(tslot->pthread, NULL);
+// 			}
+// 		}
+// 		BLI_freelistN(threadbase);
+// 	}
 
-	thread_levels--;
-	if (thread_levels == 0)
-		MEM_set_lock_callback(NULL, NULL);
-}
+// 	thread_levels--;
+// 	if (thread_levels == 0)
+// 		MEM_set_lock_callback(NULL, NULL);
+// }
 
 /* System Information */
 
@@ -726,36 +726,36 @@ static void wait_timeout(struct timespec *timeout, int ms)
 	timeout->tv_nsec = x * 1000;
 }
 
-void *BLI_thread_queue_pop_timeout(ThreadQueue *queue, int ms)
-{
-	double t;
-	void *work = NULL;
-	struct timespec timeout;
+// void *BLI_thread_queue_pop_timeout(ThreadQueue *queue, int ms)
+// {
+// 	double t;
+// 	void *work = NULL;
+// 	struct timespec timeout;
 
-	t = PIL_check_seconds_timer();
-	wait_timeout(&timeout, ms);
+// 	t = PIL_check_seconds_timer();
+// 	wait_timeout(&timeout, ms);
 
-	/* wait until there is work */
-	pthread_mutex_lock(&queue->mutex);
-	while (BLI_gsqueue_is_empty(queue->queue) && !queue->nowait) {
-		if (pthread_cond_timedwait(&queue->push_cond, &queue->mutex, &timeout) == ETIMEDOUT)
-			break;
-		else if (PIL_check_seconds_timer() - t >= ms * 0.001)
-			break;
-	}
+// 	/* wait until there is work */
+// 	pthread_mutex_lock(&queue->mutex);
+// 	while (BLI_gsqueue_is_empty(queue->queue) && !queue->nowait) {
+// 		if (pthread_cond_timedwait(&queue->push_cond, &queue->mutex, &timeout) == ETIMEDOUT)
+// 			break;
+// 		else if (PIL_check_seconds_timer() - t >= ms * 0.001)
+// 			break;
+// 	}
 
-	/* if we have something, pop it */
-	if (!BLI_gsqueue_is_empty(queue->queue)) {
-		BLI_gsqueue_pop(queue->queue, &work);
+// 	/* if we have something, pop it */
+// 	if (!BLI_gsqueue_is_empty(queue->queue)) {
+// 		BLI_gsqueue_pop(queue->queue, &work);
 		
-		if (BLI_gsqueue_is_empty(queue->queue))
-			pthread_cond_broadcast(&queue->finish_cond);
-	}
+// 		if (BLI_gsqueue_is_empty(queue->queue))
+// 			pthread_cond_broadcast(&queue->finish_cond);
+// 	}
 	
-	pthread_mutex_unlock(&queue->mutex);
+// 	pthread_mutex_unlock(&queue->mutex);
 
-	return work;
-}
+// 	return work;
+// }
 
 int BLI_thread_queue_size(ThreadQueue *queue)
 {

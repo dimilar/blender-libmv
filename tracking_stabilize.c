@@ -306,96 +306,96 @@ void BKE_tracking_stabilization_data_get(MovieTracking *tracking, int framenr, i
  *
  * NOTE: frame number should be in clip space, not scene space
  */
-ImBuf *BKE_tracking_stabilize_frame(MovieTracking *tracking, int framenr, ImBuf *ibuf,
-                                    float translation[2], float *scale, float *angle)
-{
-	float tloc[2], tscale, tangle;
-	MovieTrackingStabilization *stab = &tracking->stabilization;
-	ImBuf *tmpibuf;
-	int width = ibuf->x, height = ibuf->y;
-	float aspect = tracking->camera.pixel_aspect;
-	float mat[4][4];
-	int j, filter = tracking->stabilization.filter;
-	void (*interpolation)(struct ImBuf *, struct ImBuf *, float, float, int, int) = NULL;
-	int ibuf_flags;
+// ImBuf *BKE_tracking_stabilize_frame(MovieTracking *tracking, int framenr, ImBuf *ibuf,
+//                                     float translation[2], float *scale, float *angle)
+// {
+// 	float tloc[2], tscale, tangle;
+// 	MovieTrackingStabilization *stab = &tracking->stabilization;
+// 	ImBuf *tmpibuf;
+// 	int width = ibuf->x, height = ibuf->y;
+// 	float aspect = tracking->camera.pixel_aspect;
+// 	float mat[4][4];
+// 	int j, filter = tracking->stabilization.filter;
+// 	void (*interpolation)(struct ImBuf *, struct ImBuf *, float, float, int, int) = NULL;
+// 	int ibuf_flags;
 
-	if (translation)
-		copy_v2_v2(tloc, translation);
+// 	if (translation)
+// 		copy_v2_v2(tloc, translation);
 
-	if (scale)
-		tscale = *scale;
+// 	if (scale)
+// 		tscale = *scale;
 
-	/* Perform early output if no stabilization is used. */
-	if ((stab->flag & TRACKING_2D_STABILIZATION) == 0) {
-		if (translation)
-			zero_v2(translation);
+// 	/* Perform early output if no stabilization is used. */
+// 	if ((stab->flag & TRACKING_2D_STABILIZATION) == 0) {
+// 		if (translation)
+// 			zero_v2(translation);
 
-		if (scale)
-			*scale = 1.0f;
+// 		if (scale)
+// 			*scale = 1.0f;
 
-		if (angle)
-			*angle = 0.0f;
+// 		if (angle)
+// 			*angle = 0.0f;
 
-		return ibuf;
-	}
+// 		return ibuf;
+// 	}
 
-	/* Allocate frame for stabilization result. */
-	ibuf_flags = 0;
-	if (ibuf->rect)
-		ibuf_flags |= IB_rect;
-	if (ibuf->rect_float)
-		ibuf_flags |= IB_rectfloat;
+// 	/* Allocate frame for stabilization result. */
+// 	ibuf_flags = 0;
+// 	if (ibuf->rect)
+// 		ibuf_flags |= IB_rect;
+// 	if (ibuf->rect_float)
+// 		ibuf_flags |= IB_rectfloat;
 
-	tmpibuf = IMB_allocImBuf(ibuf->x, ibuf->y, ibuf->planes, ibuf_flags);
+// 	tmpibuf = IMB_allocImBuf(ibuf->x, ibuf->y, ibuf->planes, ibuf_flags);
 
-	/* Calculate stabilization matrix. */
-	BKE_tracking_stabilization_data_get(tracking, framenr, width, height, tloc, &tscale, &tangle);
-	BKE_tracking_stabilization_data_to_mat4(ibuf->x, ibuf->y, aspect, tloc, tscale, tangle, mat);
-	invert_m4(mat);
+// 	/* Calculate stabilization matrix. */
+// 	BKE_tracking_stabilization_data_get(tracking, framenr, width, height, tloc, &tscale, &tangle);
+// 	BKE_tracking_stabilization_data_to_mat4(ibuf->x, ibuf->y, aspect, tloc, tscale, tangle, mat);
+// 	invert_m4(mat);
 
-	if (filter == TRACKING_FILTER_NEAREST)
-		interpolation = nearest_interpolation;
-	else if (filter == TRACKING_FILTER_BILINEAR)
-		interpolation = bilinear_interpolation;
-	else if (filter == TRACKING_FILTER_BICUBIC)
-		interpolation = bicubic_interpolation;
-	else
-		/* fallback to default interpolation method */
-		interpolation = nearest_interpolation;
+// 	if (filter == TRACKING_FILTER_NEAREST)
+// 		interpolation = nearest_interpolation;
+// 	else if (filter == TRACKING_FILTER_BILINEAR)
+// 		interpolation = bilinear_interpolation;
+// 	else if (filter == TRACKING_FILTER_BICUBIC)
+// 		interpolation = bicubic_interpolation;
+// 	else
+// 		/* fallback to default interpolation method */
+// 		interpolation = nearest_interpolation;
 
-	/* This function is only used for display in clip editor and
-	 * sequencer only, which would only benefit of using threads
-	 * here.
-	 *
-	 * But need to keep an eye on this if the function will be
-	 * used in other cases.
-	 */
-#pragma omp parallel for if (tmpibuf->y > 128)
-	for (j = 0; j < tmpibuf->y; j++) {
-		int i;
-		for (i = 0; i < tmpibuf->x; i++) {
-			float vec[3] = {i, j, 0.0f};
+// 	/* This function is only used for display in clip editor and
+// 	 * sequencer only, which would only benefit of using threads
+// 	 * here.
+// 	 *
+// 	 * But need to keep an eye on this if the function will be
+// 	 * used in other cases.
+// 	 */
+// #pragma omp parallel for if (tmpibuf->y > 128)
+// 	for (j = 0; j < tmpibuf->y; j++) {
+// 		int i;
+// 		for (i = 0; i < tmpibuf->x; i++) {
+// 			float vec[3] = {i, j, 0.0f};
 
-			mul_v3_m4v3(vec, mat, vec);
+// 			mul_v3_m4v3(vec, mat, vec);
 
-			interpolation(ibuf, tmpibuf, vec[0], vec[1], i, j);
-		}
-	}
+// 			interpolation(ibuf, tmpibuf, vec[0], vec[1], i, j);
+// 		}
+// 	}
 
-	if (tmpibuf->rect_float)
-		tmpibuf->userflags |= IB_RECT_INVALID;
+// 	if (tmpibuf->rect_float)
+// 		tmpibuf->userflags |= IB_RECT_INVALID;
 
-	if (translation)
-		copy_v2_v2(translation, tloc);
+// 	if (translation)
+// 		copy_v2_v2(translation, tloc);
 
-	if (scale)
-		*scale = tscale;
+// 	if (scale)
+// 		*scale = tscale;
 
-	if (angle)
-		*angle = tangle;
+// 	if (angle)
+// 		*angle = tangle;
 
-	return tmpibuf;
-}
+// 	return tmpibuf;
+// }
 
 /* Get 4x4 transformation matrix which corresponds to
  * stabilization data and used for easy coordinate
