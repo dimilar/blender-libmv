@@ -43,7 +43,7 @@
 #include "BLI_listbase.h"
 #include "BLI_string.h"
 
-#include "BLF_translation.h"
+/* #include "BLF_translation.h" */
 
 #include "BKE_fcurve.h"
 #include "BKE_tracking.h"
@@ -328,16 +328,17 @@ bool BKE_tracking_reconstruction_check(MovieTracking *tracking, MovieTrackingObj
 	else if ((tracking->settings.reconstruction_flag & TRACKING_USE_KEYFRAME_SELECTION) == 0) {
 		/* automatic keyframe selection does not require any pre-process checks */
 		if (reconstruct_count_tracks_on_both_keyframes(tracking, object) < 8) {
-			BLI_strncpy(error_msg,
+			/*BLI_strncpy(error_msg,
 			            N_("At least 8 common tracks on both keyframes are needed for reconstruction"),
 			            error_size);
+                        */
 
 			return false;
 		}
 	}
 
 #ifndef WITH_LIBMV
-	BLI_strncpy(error_msg, N_("Blender is compiled without motion tracking library"), error_size);
+	/* BLI_strncpy(error_msg, N_("Blender is compiled without motion tracking library"), error_size); */
 	return false;
 #endif
 

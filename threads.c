@@ -40,7 +40,7 @@
 #include "BLI_task.h"
 #include "BLI_threads.h"
 
-#include "PIL_time.h"
+/* #include "PIL_time.h" */
 
 /* for checking system threads - BLI_system_thread_count */
 #ifdef WIN32

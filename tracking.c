@@ -51,7 +51,7 @@
 #include "BLI_string.h"
 #include "BLI_threads.h"
 
-#include "BLF_translation.h"
+/* #include "BLF_translation.h" */
 
 #include "BKE_fcurve.h"
 #include "BKE_tracking.h"
@@ -64,7 +64,7 @@
 
 #include "RNA_access.h"
 
-#include "raskter.h"
+/* #include "raskter.h" */
 
 #include "libmv-capi.h"
 #include "tracking_private.h"
@@ -831,7 +831,7 @@ static void track_mask_gpencil_layer_rasterize(int frame_width, int frame_height
 				}
 
 				/* TODO: add an option to control whether AA is enabled or not */
-				PLX_raskterize((float (*)[2])mask_points, stroke->totpoints, mask, mask_width, mask_height);
+				/* PLX_raskterize((float (*)[2])mask_points, stroke->totpoints, mask, mask_width, mask_height); */
 
 				MEM_freeN(mask_points);
 			}
