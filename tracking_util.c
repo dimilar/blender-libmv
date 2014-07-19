@@ -59,20 +59,20 @@ TracksMap *tracks_map_new(const char *object_name, bool is_camera, int num_track
 {
 	TracksMap *map = MEM_callocN(sizeof(TracksMap), "TrackingsMap");
 
-	// BLI_strncpy(map->object_name, object_name, sizeof(map->object_name));
-	// map->is_camera = is_camera;
+	BLI_strncpy(map->object_name, object_name, sizeof(map->object_name));
+	map->is_camera = is_camera;
 
-	// map->num_tracks = num_tracks;
-	// map->customdata_size = customdata_size;
+	map->num_tracks = num_tracks;
+	map->customdata_size = customdata_size;
 
-	// map->tracks = MEM_callocN(sizeof(MovieTrackingTrack) * num_tracks, "TrackingsMap tracks");
+	map->tracks = MEM_callocN(sizeof(MovieTrackingTrack) * num_tracks, "TrackingsMap tracks");
 
-	// if (customdata_size)
-	// 	map->customdata = MEM_callocN(customdata_size * num_tracks, "TracksMap customdata");
+	if (customdata_size)
+		map->customdata = MEM_callocN(customdata_size * num_tracks, "TracksMap customdata");
 
-	// map->hash = BLI_ghash_ptr_new("TracksMap hash");
+	map->hash = BLI_ghash_ptr_new("TracksMap hash");
 
-	// BLI_spin_init(&map->spin_lock);
+	BLI_spin_init(&map->spin_lock);
 
 	return map;
 }
@@ -94,16 +94,16 @@ void tracks_map_insert(TracksMap *map, MovieTrackingTrack *track, void *customda
 {
 	MovieTrackingTrack new_track = *track;
 
-	// new_track.markers = MEM_dupallocN(new_track.markers);
+	new_track.markers = MEM_dupallocN(new_track.markers);
 
-	// map->tracks[map->ptr] = new_track;
+	map->tracks[map->ptr] = new_track;
 
-	// if (customdata)
-	// 	memcpy(&map->customdata[map->ptr * map->customdata_size], customdata, map->customdata_size);
+	if (customdata)
+		memcpy(&map->customdata[map->ptr * map->customdata_size], customdata, map->customdata_size);
 
-	// BLI_ghash_insert(map->hash, &map->tracks[map->ptr], track);
+	BLI_ghash_insert(map->hash, &map->tracks[map->ptr], track);
 
-	// map->ptr++;
+	map->ptr++;
 }
 
 void tracks_map_merge(TracksMap *map, MovieTracking *tracking)
@@ -203,25 +203,25 @@ void tracks_map_merge(TracksMap *map, MovieTracking *tracking)
 
 void tracks_map_free(TracksMap *map, void (*customdata_free)(void *customdata))
 {
-	// int i = 0;
+	int i = 0;
 
-	// BLI_ghash_free(map->hash, NULL, NULL);
+	BLI_ghash_free(map->hash, NULL, NULL);
 
-	// for (i = 0; i < map->num_tracks; i++) {
-	// 	if (map->customdata && customdata_free)
-	// 		customdata_free(&map->customdata[i * map->customdata_size]);
+	for (i = 0; i < map->num_tracks; i++) {
+		if (map->customdata && customdata_free)
+			customdata_free(&map->customdata[i * map->customdata_size]);
 
-	// 	BKE_tracking_track_free(&map->tracks[i]);
-	// }
+		BKE_tracking_track_free(&map->tracks[i]);
+	}
 
-	// if (map->customdata)
-	// 	MEM_freeN(map->customdata);
+	if (map->customdata)
+		MEM_freeN(map->customdata);
 
-	// MEM_freeN(map->tracks);
+	MEM_freeN(map->tracks);
 
-	// BLI_spin_end(&map->spin_lock);
+	BLI_spin_end(&map->spin_lock);
 
-	// MEM_freeN(map);
+	MEM_freeN(map);
 }
 
 /*********************** Space transformation functions *************************/

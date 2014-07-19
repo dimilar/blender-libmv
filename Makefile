@@ -1,5 +1,5 @@
 CXX = clang++
-CC = gcc
+CC = clang
 STD  := c++11
 
 ifdef debug
