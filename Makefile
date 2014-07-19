@@ -33,7 +33,7 @@ CXXFLAGS := $(OPT_FLAGS) -std=$(STD) -fopenmp -Wall -fPIC -DLINUX $(INCDIR) \
 	-DLIBMV_NO_FAST_DETECTOR=
 # -DWITH_LIBMV_GUARDED_ALLOC
 CFLAGS = $(OPT_FLAGS) -fopenmp\
--DHAVE_STDBOOL_H -DNDEBUG -DWITH_INTERNATIONAL -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -D__LITTLE_ENDIAN__ -D__MMX__ -D__SSE2__ -D__SSE__ -Wall -Wcast-align -Werror=declaration-after-statement -Werror=implicit-function-declaration -Werror=return-type -Wstrict-prototypes -Wmissing-prototypes -Wno-char-subscripts -Wno-unknown-pragmas -Wpointer-arith -Wunused-parameter -Wwrite-strings -Wlogical-op -Wundef -Winit-self -Wnonnull -Wmissing-include-dirs -Wno-div-by-zero -Wtype-limits -Wuninitialized -Wredundant-decls -Wno-error=unused-but-set-variable -fopenmp -msse2 -msse -pipe -fPIC -funsigned-char -fno-strict-aliasing -Wextra -Wno-sign-conversion -fPIC -DLINUX -I./guardedalloc -I./bli -I./dna -I./
+-DHAVE_STDBOOL_H -DNDEBUG -DWITH_INTERNATIONAL -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE -D__LITTLE_ENDIAN__ -D__MMX__ -D__SSE2__ -D__SSE__ -Wall -Wcast-align -Werror=declaration-after-statement -Werror=implicit-function-declaration -Werror=return-type -Wstrict-prototypes -Wmissing-prototypes -Wno-char-subscripts -Wno-unknown-pragmas -Wpointer-arith -Wunused-parameter -Wwrite-strings -Wlogical-op -Wundef -Winit-self -Wnonnull -Wmissing-include-dirs -Wno-div-by-zero -Wtype-limits -Wuninitialized -Wredundant-decls -Wno-error=unused-but-set-variable -fopenmp -msse2 -msse -pipe -fPIC -funsigned-char -fno-strict-aliasing -Wextra -Wno-sign-conversion -fPIC -DLINUX -I./bli -I./dna -I./imbuf -I./bke -I./
 LDFLAGS := $(LDDIR) 
 
 ifeq "$(CXX)" "clang++"
@@ -43,7 +43,7 @@ else
 endif
 
 BUILD_DIR = build
-PROGRAMS = libmv.so mvtest
+PROGRAMS = mvtest
 all:build_dir $(PROGRAMS)
 
 BASE_OBJECTS = $(patsubst libmv/base/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/base -name \*.cc|grep -v test))
@@ -54,6 +54,7 @@ TR_OBJECTS = $(patsubst libmv/tracking/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/
 MV_OBJECTS = $(patsubst libmv/multiview/%.cc,$(BUILD_DIR)/%.o,$(shell find libmv/multiview -name \*.cc|grep -v test))
 CAPI_OBJECTS = $(patsubst %.cc,$(BUILD_DIR)/%.o,$(wildcard *.cc))
 C_OBJECTS= $(patsubst %.c,$(BUILD_DIR)/%.o,$(wildcard *.c))
+# MEM_OBJECTS= $(patsubst %.c,$(BUILD_DIR)/%.o,$(wildcard guardedalloc/intern/*.c))
 
 $(BASE_OBJECTS): $(BUILD_DIR)/%.o: libmv/base/%.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
@@ -71,6 +72,9 @@ $(CAPI_OBJECTS):$(BUILD_DIR)/%.o: %.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 $(C_OBJECTS):$(BUILD_DIR)/%.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
+$(MEM_OBJECTS):$(BUILD_DIR)/%.o: guardedalloc/intern/%.c
+	$(CC) -c $(CFLAGS) $< -o $@
+
 $(BUILD_DIR)/mvtest.o:demo/mvtest.cc
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 libmv.so: $(CAPI_OBJECTS)  $(BASE_OBJECTS) $(TR_OBJECTS) $(MV_OBJECTS) $(NUM_OBJECTS) $(SP_OBJECTS) $(IMG_OBJECTS)
@@ -85,7 +89,7 @@ build_dir:
 	@mkdir -p $(BUILD_DIR)
 
 clean:
-	@rm -rf $(PROGRAMS) *.o $(BUILD_DIR)/*.o
+	@rm -rf $(PROGRAMS) $(C_OBJECTS)
 
 
 recompile:clean all
